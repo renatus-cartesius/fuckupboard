@@ -1,17 +1,17 @@
 .add-fuckup-form {
   background: #ffffff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .add-fuckup-form h2 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
-  font-size: 20px;
-  font-weight: 600;
+  color: #333333;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.25px;
 }
 
 .form-group {
@@ -21,54 +21,55 @@
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  font-weight: 500;
-  color: #34495e;
-  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  font-size: 13px;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
   font-size: 14px;
   transition: border-color 0.2s ease;
   box-sizing: border-box;
   font-family: inherit;
+  background: #ffffff;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: #6c757d;
 }
 
 .form-group input:disabled,
 .form-group textarea:disabled {
   background-color: #f8f9fa;
   cursor: not-allowed;
+  color: #6c757d;
 }
 
 .submit-button {
-  background: #3498db;
+  background: #6c757d;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 12px 24px;
+  border-radius: 4px;
+  padding: 10px 20px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   transition: background-color 0.2s ease;
   width: 100%;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #2980b9;
+  background: #5a6268;
 }
 
 .submit-button:disabled {
-  background: #bdc3c7;
+  background: #adb5bd;
   cursor: not-allowed;
 } 

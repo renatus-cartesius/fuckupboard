@@ -101,7 +101,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>💥 Fuckup Board</h1>
+        <h1>Fuckup Board</h1>
         <p>Share your IT disasters and learn from others' mistakes</p>
         <div className="header-stats">
           <span>You've liked {likedCount} fuckup{likedCount !== 1 ? 's' : ''}</span>

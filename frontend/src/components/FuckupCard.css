@@ -1,11 +1,10 @@
 .fuckup-card {
   background: #ffffff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 24px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease, transform 0.3s ease;
+  transition: border-color 0.2s ease, transform 0.3s ease;
 }
 
 .fuckup-card.liked-recently {
@@ -15,79 +14,81 @@
 @keyframes likePulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-color: #e9ecef;
   }
   50% {
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+    transform: scale(1.01);
+    border-color: #6c757d;
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-color: #e9ecef;
   }
 }
 
 .fuckup-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #dee2e6;
 }
 
 .fuckup-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .fuckup-description {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
-  color: #2c3e50;
+  color: #333333;
   margin: 0;
   word-wrap: break-word;
+  font-weight: 300;
 }
 
 .fuckup-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .fuckup-user {
-  font-size: 14px;
-  color: #7f8c8d;
-  font-style: italic;
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 300;
 }
 
 .like-button {
   background: none;
-  border: 1px solid #e74c3c;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 14px;
-  color: #e74c3c;
+  border: 1px solid #6c757d;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #6c757d;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 4px;
+  font-weight: 400;
 }
 
 .like-button:hover {
-  background: #e74c3c;
+  background: #6c757d;
   color: white;
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .like-button:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 .like-button.liked {
-  background: #e74c3c;
+  background: #6c757d;
   color: white;
 }
 
 .like-button.liked:hover {
-  background: #c0392b;
-  transform: scale(1.05);
+  background: #5a6268;
+  transform: scale(1.02);
 } 

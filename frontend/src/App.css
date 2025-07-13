@@ -9,8 +9,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f9fa;
-  color: #2c3e50;
+  background-color: #ffffff;
+  color: #333333;
 }
 
 .App {
@@ -20,36 +20,38 @@ body {
 }
 
 .App-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f8f9fa;
+  color: #333333;
   text-align: center;
-  padding: 40px 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 60px 20px;
+  border-bottom: 1px solid #e9ecef;
 }
 
 .App-header h1 {
   margin: 0 0 8px 0;
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.5px;
 }
 
 .App-header p {
   margin: 0;
-  font-size: 1.1rem;
-  opacity: 0.9;
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 300;
 }
 
 .header-stats {
-  margin-top: 12px;
-  font-size: 0.9rem;
-  opacity: 0.8;
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: #6c757d;
 }
 
 .header-stats span {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px 12px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
 }
 
 .App-main {
@@ -58,65 +60,70 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
 .fuckups-section h2 {
-  color: #2c3e50;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0 0 20px 0;
+  color: #333333;
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.25px;
 }
 
 .loading {
   text-align: center;
-  padding: 40px;
-  color: #7f8c8d;
-  font-size: 1.1rem;
+  padding: 60px 20px;
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 300;
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  color: #7f8c8d;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
+  padding: 80px 20px;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
 }
 
 .empty-state p {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 300;
 }
 
 .error-message {
-  background: #fee;
-  border: 1px solid #fcc;
-  border-radius: 6px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
   padding: 16px;
-  margin-bottom: 20px;
-  color: #c33;
+  margin-bottom: 24px;
+  color: #6c757d;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  font-size: 0.875rem;
 }
 
 .retry-button {
-  background: #c33;
+  background: #6c757d;
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
   white-space: nowrap;
+  font-weight: 400;
 }
 
 .retry-button:hover {
-  background: #a22;
+  background: #5a6268;
 }
 
 .fuckups-list {
