@@ -59,6 +59,11 @@ func like(ctx context.Context, db *sql.DB, id string) error {
 	return err
 }
 
+func unlike(ctx context.Context, db *sql.DB, id string) error {
+	_, err := db.ExecContext(ctx, "UPDATE fuckups SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id = ?", id)
+	return err
+}
+
 func main() {
 
 	log.Println("starting app")
@@ -71,6 +76,22 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
+
+	// Add CORS middleware
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
 
 	r.GET("/list", func(c *gin.Context) {
 
@@ -87,12 +108,12 @@ func main() {
 
 	r.POST("/add", func(c *gin.Context) {
 
-		rb := struct{
+		rb := struct {
 			User string `json:"user"`
 			Desc string `json:"desc"`
 		}{}
 
-		if err := json.NewDecoder(c.Request.Body).Decode(&rb) ; err != nil{
+		if err := json.NewDecoder(c.Request.Body).Decode(&rb); err != nil {
 			c.JSON(
 				http.StatusBadRequest,
 				gin.H{
@@ -117,22 +138,36 @@ func main() {
 		)
 	})
 
-
 	r.PUT("/like", func(c *gin.Context) {
-		if err := like(c, db, c.Query("id")) ; err != nil {
+		if err := like(c, db, c.Query("id")); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"msg": fmt.Sprintf("failed when like: %v", err),
 			})
 			return
 		}
 
-		fmt.Println(c.Query("id"))
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"msg": "ok",
+				"id":  c.Query("id"),
+			},
+		)
+	})
+
+	r.DELETE("/unlike", func(c *gin.Context) {
+		if err := unlike(c, db, c.Query("id")); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"msg": fmt.Sprintf("failed when unlike: %v", err),
+			})
+			return
+		}
 
 		c.JSON(
 			http.StatusOK,
 			gin.H{
 				"msg": "ok",
-				"id": c.Query("id"),
+				"id":  c.Query("id"),
 			},
 		)
 	})
