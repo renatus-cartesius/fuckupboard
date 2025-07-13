@@ -12,10 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func init(){
-	fmt.Println("sdfsdf")
-}
-
 type Fuckup struct {
 	Id    string `json:"id"`
 	User  string `json:"user"`
@@ -24,13 +20,13 @@ type Fuckup struct {
 }
 
 func get(ctx context.Context, db *sql.DB) ([]*Fuckup, error) {
-	rows, err := db.QueryContext(ctx, "SELECT id, user, desc, likes FROM fuckups")
+	rows, err := db.QueryContext(ctx, "SELECT id, user, desc, likes FROM fuckups ORDER BY likes DESC")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	fs := []*Fuckup{}
+	fs := make([]*Fuckup, 0)
 
 	for rows.Next() {
 		f := Fuckup{}
@@ -44,7 +40,7 @@ func get(ctx context.Context, db *sql.DB) ([]*Fuckup, error) {
 
 	}
 
-	return nil, nil
+	return fs, nil
 }
 
 func add(ctx context.Context, db *sql.DB, user, desc string) error {
@@ -67,8 +63,6 @@ func main() {
 
 	log.Println("starting app")
 
-	ctx := context.Background()
-
 	log.Println("openning db")
 	db, err := sql.Open("sqlite3", "fuckups.db")
 	if err != nil {
@@ -80,10 +74,10 @@ func main() {
 
 	r.GET("/list", func(c *gin.Context) {
 
-		fs, err := get(ctx, db)
+		fs, err := get(c, db)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": fmt.Sprintf("failed when getting: %v", err),
+				"msg": fmt.Sprintf("failed when getting: %v", err),
 			})
 			return
 		}
@@ -108,12 +102,39 @@ func main() {
 			return
 		}
 
-		if err := add(ctx, db, rb.User, rb.Desc); err != nil {
+		if err := add(c, db, rb.User, rb.Desc); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": fmt.Sprintf("failed when adding: %v", err),
+				"msg": fmt.Sprintf("failed when adding: %v", err),
 			})
 			return
 		}
+
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"msg": "ok",
+			},
+		)
+	})
+
+
+	r.PUT("/like", func(c *gin.Context) {
+		if err := like(c, db, c.Query("id")) ; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"msg": fmt.Sprintf("failed when like: %v", err),
+			})
+			return
+		}
+
+		fmt.Println(c.Query("id"))
+
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"msg": "ok",
+				"id": c.Query("id"),
+			},
+		)
 	})
 
 	log.Println("running server")
