@@ -31,7 +31,7 @@ export const likeService = {
     }
   },
 
-  // Remove a fuckup from the liked list (for future use if needed)
+  // Remove a fuckup from the liked list
   removeLikedFuckup: (fuckupId: string): void => {
     try {
       const likedFuckups = likeService.getLikedFuckups();

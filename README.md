@@ -17,6 +17,7 @@ A simple board for sharing IT fuckups and learning from others' mistakes.
 - `GET /list` - Get all fuckups ordered by likes
 - `POST /add` - Add new fuckup (requires user and desc in JSON body)
 - `PUT /like?id={id}` - Like a fuckup by ID
+- `DELETE /unlike?id={id}` - Unlike a fuckup by ID
 
 ### Running the Backend
 
@@ -38,7 +39,8 @@ A minimalistic React frontend with TypeScript.
 
 - View all fuckups in a clean, card-based layout
 - Add new fuckup stories through a simple form
-- Like fuckups with a single click
+- Like and unlike fuckups with a single click
+- Persistent like state across browser sessions
 - Responsive design for mobile and desktop
 - Error handling and loading states
 

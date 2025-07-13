@@ -5,6 +5,7 @@ import AddFuckupForm from './components/AddFuckupForm';
 import { Fuckup, AddFuckupRequest } from './types/Fuckup';
 import { fuckupApi } from './services/api';
 import { likeService } from './services/likeService';
+import { sortFuckupsByLikes } from './utils/sortUtils';
 
 function App() {
   const [fuckups, setFuckups] = useState<Fuckup[]>([]);
@@ -17,7 +18,8 @@ function App() {
     try {
       setLoading(true);
       const data = await fuckupApi.getFuckups();
-      setFuckups(data);
+      // Ensure the data is sorted by likes (backend should already sort, but we ensure it)
+      setFuckups(sortFuckupsByLikes(data));
       setError(null);
     } catch (err) {
       setError('Failed to load fuckups. Make sure the backend is running.');
@@ -42,11 +44,6 @@ function App() {
 
   const handleLike = async (id: string) => {
     try {
-      // Check if already liked
-      if (likeService.isLiked(id)) {
-        return; // Already liked, do nothing
-      }
-
       await fuckupApi.likeFuckup(id);
       
       // Save to localStorage
@@ -55,17 +52,43 @@ function App() {
       // Update liked count
       setLikedCount(likeService.getLikedFuckups().length);
       
-      // Update the local state to reflect the new like count
-      setFuckups(prev => 
-        prev.map(fuckup => 
+      // Update the local state to reflect the new like count and sort
+      setFuckups(prev => {
+        const updatedFuckups = prev.map(fuckup => 
           fuckup.id === id 
             ? { ...fuckup, likes: fuckup.likes + 1 }
             : fuckup
-        )
-      );
+        );
+        return sortFuckupsByLikes(updatedFuckups);
+      });
     } catch (err) {
       setError('Failed to like fuckup. Please try again.');
       console.error('Error liking fuckup:', err);
+    }
+  };
+
+  const handleUnlike = async (id: string) => {
+    try {
+      await fuckupApi.unlikeFuckup(id);
+      
+      // Remove from localStorage
+      likeService.removeLikedFuckup(id);
+      
+      // Update liked count
+      setLikedCount(likeService.getLikedFuckups().length);
+      
+      // Update the local state to reflect the new like count and sort
+      setFuckups(prev => {
+        const updatedFuckups = prev.map(fuckup => 
+          fuckup.id === id 
+            ? { ...fuckup, likes: Math.max(0, fuckup.likes - 1) }
+            : fuckup
+        );
+        return sortFuckupsByLikes(updatedFuckups);
+      });
+    } catch (err) {
+      setError('Failed to unlike fuckup. Please try again.');
+      console.error('Error unliking fuckup:', err);
     }
   };
 
@@ -114,6 +137,7 @@ function App() {
                     key={fuckup.id}
                     fuckup={fuckup}
                     onLike={handleLike}
+                    onUnlike={handleUnlike}
                   />
                 ))}
               </div>

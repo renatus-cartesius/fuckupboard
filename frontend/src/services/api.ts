@@ -28,4 +28,10 @@ export const fuckupApi = {
     const response = await api.put(`/like?id=${id}`);
     return response.data;
   },
+
+  // Unlike a fuckup
+  unlikeFuckup: async (id: string): Promise<{ msg: string; id: string }> => {
+    const response = await api.delete(`/unlike?id=${id}`);
+    return response.data;
+  },
 }; 

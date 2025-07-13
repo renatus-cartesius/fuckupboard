@@ -5,7 +5,26 @@
   padding: 20px;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.3s ease;
+}
+
+.fuckup-card.liked-recently {
+  animation: likePulse 0.6s ease-out;
+}
+
+@keyframes likePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
 }
 
 .fuckup-card:hover {
@@ -53,28 +72,22 @@
   gap: 4px;
 }
 
-.like-button:hover:not(:disabled) {
+.like-button:hover {
   background: #e74c3c;
   color: white;
   transform: scale(1.05);
 }
 
-.like-button:active:not(:disabled) {
+.like-button:active {
   transform: scale(0.95);
 }
 
 .like-button.liked {
   background: #e74c3c;
   color: white;
-  cursor: default;
 }
 
 .like-button.liked:hover {
-  transform: none;
-  background: #e74c3c;
-}
-
-.like-button:disabled {
-  cursor: default;
-  opacity: 0.8;
+  background: #c0392b;
+  transform: scale(1.05);
 } 
