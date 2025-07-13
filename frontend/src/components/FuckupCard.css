@@ -1,0 +1,80 @@
+.fuckup-card {
+  background: #ffffff;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.fuckup-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fuckup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fuckup-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.fuckup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.fuckup-user {
+  font-size: 14px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.like-button {
+  background: none;
+  border: 1px solid #e74c3c;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #e74c3c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.like-button:hover:not(:disabled) {
+  background: #e74c3c;
+  color: white;
+  transform: scale(1.05);
+}
+
+.like-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.like-button.liked {
+  background: #e74c3c;
+  color: white;
+  cursor: default;
+}
+
+.like-button.liked:hover {
+  transform: none;
+  background: #e74c3c;
+}
+
+.like-button:disabled {
+  cursor: default;
+  opacity: 0.8;
+} 
