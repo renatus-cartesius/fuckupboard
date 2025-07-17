@@ -1,0 +1,174 @@
+---
+- name: Deploy Fuckup Board Application
+  hosts: servers
+  become: yes
+  vars:
+    backend_image: "{{ backend_image | default('ghcr.io/your-username/fckupboard-backend:latest') }}"
+    frontend_image: "{{ frontend_image | default('ghcr.io/your-username/fckupboard-frontend:latest') }}"
+  
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-pip
+          - wget
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      loop:
+        - /opt/fuckupboard
+        - "{{ db_path }}"
+        - /opt/fuckupboard/logs
+
+    - name: Create empty database file if it doesn't exist
+      file:
+        path: "{{ db_path }}/{{ db_file }}"
+        state: touch
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Create Docker network
+      docker_network:
+        name: "{{ docker_network }}"
+        state: present
+
+    - name: Stop and remove existing containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+        force_kill: yes
+      loop:
+        - "{{ app_name }}-backend"
+        - "{{ app_name }}-frontend"
+      ignore_errors: yes
+
+    - name: Remove old images
+      docker_image:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ backend_image }}"
+        - "{{ frontend_image }}"
+      ignore_errors: yes
+
+    - name: Pull latest images
+      docker_image:
+        name: "{{ item }}"
+        source: pull
+      loop:
+        - "{{ backend_image }}"
+        - "{{ frontend_image }}"
+
+    - name: Create backend container
+      docker_container:
+        name: "{{ app_name }}-backend"
+        image: "{{ backend_image }}"
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: "{{ docker_network }}"
+        ports:
+          - "{{ backend_port }}:8080"
+        volumes:
+          - "{{ db_path }}/{{ db_file }}:/root/{{ db_file }}"
+        env:
+          GIN_MODE: "release"
+        healthcheck:
+          test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/list"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 40s
+        user: "{{ ansible_user }}"
+
+    - name: Wait for backend to be healthy
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ backend_port }}"
+        delay: 10
+        timeout: 60
+
+    - name: Create frontend container
+      docker_container:
+        name: "{{ app_name }}-frontend"
+        image: "{{ frontend_image }}"
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: "{{ docker_network }}"
+        ports:
+          - "{{ frontend_port }}:80"
+        depends_on:
+          - "{{ app_name }}-backend"
+        healthcheck:
+          test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 40s
+
+    - name: Wait for frontend to be healthy
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ frontend_port }}"
+        delay: 10
+        timeout: 60
+
+    - name: Show deployment status
+      debug:
+        msg: |
+          Deployment completed successfully!
+          
+          Backend: http://{{ ansible_host }}:{{ backend_port }}
+          Frontend: http://{{ ansible_host }}:{{ frontend_port }}
+          
+          Backend Image: {{ backend_image }}
+          Frontend Image: {{ frontend_image }} 

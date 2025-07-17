@@ -74,24 +74,67 @@ npm run build
 ### Both Services Together
 - `./start.sh` - Start both backend and frontend simultaneously
 
+## Docker Development
+
+### Using Docker Compose
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+```
+
+## Production Deployment
+
+The application includes a complete CI/CD pipeline using GitHub Actions and Ansible.
+
+### Quick Start
+1. Set up GitHub repository secrets (see `DEPLOYMENT.md`)
+2. Push to main branch to trigger automatic deployment
+3. Access your application at `http://your-server-ip`
+
+### Manual Deployment
+```bash
+cd ansible
+ansible-playbook deploy.yml
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Project Structure
 
 ```
 fckupboard/
-├── main.go              # Golang backend server
-├── fuckups.db           # SQLite database
-├── go.mod               # Go dependencies
-├── go.sum               # Go dependencies checksum
-├── back.sh              # Backend startup script
-├── front.sh             # Frontend startup script
-├── start.sh             # Combined startup script
-├── README.md            # This file
-└── frontend/            # React frontend
+├── main.go                    # Golang backend server
+├── fuckups.db                 # SQLite database
+├── go.mod                     # Go dependencies
+├── go.sum                     # Go dependencies checksum
+├── Dockerfile.backend         # Backend Docker image
+├── docker-compose.yml         # Local development setup
+├── back.sh                    # Backend startup script
+├── front.sh                   # Frontend startup script
+├── start.sh                   # Combined startup script
+├── README.md                  # This file
+├── DEPLOYMENT.md              # Deployment documentation
+├── .github/workflows/         # GitHub Actions CI/CD
+│   └── deploy.yml
+├── ansible/                   # Ansible deployment
+│   ├── deploy.yml            # Main deployment playbook
+│   ├── rollback.yml          # Rollback playbook
+│   ├── inventory.yml         # Server inventory
+│   ├── requirements.yml      # Ansible collections
+│   └── ansible.cfg           # Ansible configuration
+└── frontend/                  # React frontend
     ├── src/
-    │   ├── components/  # React components
-    │   ├── services/    # API service functions
-    │   ├── types/       # TypeScript type definitions
-    │   └── App.tsx      # Main application
-    ├── package.json     # Node.js dependencies
-    └── README.md        # Frontend documentation
+    │   ├── components/       # React components
+    │   ├── services/         # API service functions
+    │   ├── types/            # TypeScript type definitions
+    │   └── App.tsx           # Main application
+    ├── Dockerfile            # Frontend Docker image
+    ├── package.json          # Node.js dependencies
+    └── README.md             # Frontend documentation
 ```

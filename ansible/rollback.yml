@@ -1,0 +1,77 @@
+---
+- name: Rollback Fuckup Board Application
+  hosts: servers
+  become: yes
+  vars:
+    previous_backend_image: "{{ previous_backend_image | default('ghcr.io/your-username/fckupboard-backend:previous') }}"
+    previous_frontend_image: "{{ previous_frontend_image | default('ghcr.io/your-username/fckupboard-frontend:previous') }}"
+  
+  tasks:
+    - name: Stop current containers
+      docker_container:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - "{{ app_name }}-backend"
+        - "{{ app_name }}-frontend"
+
+    - name: Remove current containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ app_name }}-backend"
+        - "{{ app_name }}-frontend"
+
+    - name: Pull previous images
+      docker_image:
+        name: "{{ item }}"
+        source: pull
+      loop:
+        - "{{ previous_backend_image }}"
+        - "{{ previous_frontend_image }}"
+
+    - name: Start backend with previous image
+      docker_container:
+        name: "{{ app_name }}-backend"
+        image: "{{ previous_backend_image }}"
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: "{{ docker_network }}"
+        ports:
+          - "{{ backend_port }}:8080"
+        volumes:
+          - "{{ db_path }}/{{ db_file }}:/root/{{ db_file }}"
+        env:
+          GIN_MODE: "release"
+        user: "{{ ansible_user }}"
+
+    - name: Wait for backend to be healthy
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ backend_port }}"
+        delay: 10
+        timeout: 60
+
+    - name: Start frontend with previous image
+      docker_container:
+        name: "{{ app_name }}-frontend"
+        image: "{{ previous_frontend_image }}"
+        state: started
+        restart_policy: unless-stopped
+        networks:
+          - name: "{{ docker_network }}"
+        ports:
+          - "{{ frontend_port }}:80"
+
+    - name: Show rollback status
+      debug:
+        msg: |
+          Rollback completed successfully!
+          
+          Backend: http://{{ ansible_host }}:{{ backend_port }}
+          Frontend: http://{{ ansible_host }}:{{ frontend_port }}
+          
+          Backend Image: {{ previous_backend_image }}
+          Frontend Image: {{ previous_frontend_image }} 
