@@ -194,4 +194,4 @@
           Frontend: http://{{ ansible_host }}:{{ frontend_port }}
           
           Backend Image: {{ backend_image }}
-          Frontend Image: {{ frontend_image }} 
+          Frontend Image: {{ frontend_image }}
