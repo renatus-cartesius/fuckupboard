@@ -129,6 +129,14 @@ If you need to deploy manually:
 
 The SQLite database is persisted at `/opt/fuckupboard/data/fuckups.db` on the server.
 
+**Schema:**
+- Uses UUID format for IDs: `lower(hex(randomblob(16)))`
+- Table: `fuckups` with columns: `id`, `user`, `desc`, `likes`
+- Index on `likes` for performance
+
+**Migrations:**
+The application uses Goose for database migrations. Migrations are automatically applied during deployment.
+
 ## Monitoring
 
 ### Health Checks

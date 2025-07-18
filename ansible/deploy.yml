@@ -67,6 +67,11 @@
         - "{{ db_path }}"
         - /opt/fuckupboard/logs
 
+    - name: Install SQLite3
+      apt:
+        name: sqlite3
+        state: present
+
     - name: Create empty database file if it doesn't exist
       file:
         path: "{{ db_path }}/{{ db_file }}"
@@ -75,20 +80,27 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
 
+    - name: Copy migration files
+      copy:
+        src: "{{ item }}"
+        dest: "/tmp/{{ item | basename }}"
+        mode: '0644'
+      loop:
+        - "migrations/20240101000000_create_fuckups_table.sql"
+        - "migrations/20240101000001_add_likes_index.sql"
+
+    - name: Run database migrations
+      shell: |
+        cd /tmp
+        sqlite3 "{{ db_path }}/{{ db_file }}" < 20240101000000_create_fuckups_table.sql
+        sqlite3 "{{ db_path }}/{{ db_file }}" < 20240101000001_add_likes_index.sql
+      become: yes
+      become_user: "{{ ansible_user }}"
+
     - name: Create Docker network
       docker_network:
         name: "{{ docker_network }}"
         state: present
-
-    - name: Stop and remove existing containers
-      docker_container:
-        name: "{{ item }}"
-        state: absent
-        force_kill: yes
-      loop:
-        - "{{ app_name }}-backend"
-        - "{{ app_name }}-frontend"
-      ignore_errors: yes
 
     - name: Remove old images
       docker_image:
@@ -106,6 +118,16 @@
       loop:
         - "{{ backend_image }}"
         - "{{ frontend_image }}"
+
+    - name: Stop and remove existing containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+        force_kill: yes
+      loop:
+        - "{{ app_name }}-backend"
+        - "{{ app_name }}-frontend"
+      ignore_errors: yes
 
     - name: Create backend container
       docker_container:

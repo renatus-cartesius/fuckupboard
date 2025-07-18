@@ -74,10 +74,31 @@ npm run build
 ### Both Services Together
 - `./start.sh` - Start both backend and frontend simultaneously
 
+## Database Setup
+
+### Run Migrations
+```bash
+# Option 1: Using the migration script (recommended)
+./migrate.sh
+
+# Option 2: Using the initialization script
+./init-db.sh
+
+# Option 3: Using SQLite3 directly
+sqlite3 fuckups.db < migrations/20240101000000_create_fuckups_table.sql
+sqlite3 fuckups.db < migrations/20240101000001_add_likes_index.sql
+
+# Option 4: Check migration status
+./migrate.sh fuckups.db status
+```
+
 ## Docker Development
 
 ### Using Docker Compose
 ```bash
+# Initialize database first (if not exists)
+docker-compose --profile init up db-init
+
 # Build and start all services
 docker-compose up --build
 
@@ -115,11 +136,18 @@ fckupboard/
 ├── go.sum                     # Go dependencies checksum
 ├── Dockerfile.backend         # Backend Docker image
 ├── docker-compose.yml         # Local development setup
+├── migrate.sh                 # Database migration script
+├── init-db.sh                 # Database initialization script
 ├── back.sh                    # Backend startup script
 ├── front.sh                   # Frontend startup script
 ├── start.sh                   # Combined startup script
 ├── README.md                  # This file
 ├── DEPLOYMENT.md              # Deployment documentation
+├── migrations/                # Database migrations
+│   ├── 20240101000000_create_fuckups_table.sql
+│   └── 20240101000001_add_likes_index.sql
+├── cmd/migrate/               # Migration tool
+│   └── main.go               # Goose migration runner
 ├── .github/workflows/         # GitHub Actions CI/CD
 │   └── deploy.yml
 ├── ansible/                   # Ansible deployment

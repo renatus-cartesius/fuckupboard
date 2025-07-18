@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  db-init:
+    image: alpine:latest
+    volumes:
+      - ./fuckups.db:/fuckups.db
+      - ./migrations:/migrations
+    command: |
+      sh -c "
+        apk add --no-cache sqlite
+        sqlite3 /fuckups.db < /migrations/20240101000000_create_fuckups_table.sql
+        sqlite3 /fuckups.db < /migrations/20240101000001_add_likes_index.sql
+        echo 'Database migrations completed'
+      "
+    profiles:
+      - init
+
   backend:
     build:
       context: .
@@ -19,6 +34,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - db-init
 
   frontend:
     build:
