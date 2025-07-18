@@ -22,4 +22,4 @@ all:
         
         # Database
         db_path: /opt/fuckupboard/data
-        db_file: fuckups.db 
+        db_file: fuckups.db
