@@ -151,14 +151,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: |
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
-      (contains(github.event.head_commit.modified, 'main.go') ||
-       contains(github.event.head_commit.modified, 'go.mod') ||
-       contains(github.event.head_commit.modified, 'go.sum') ||
-       contains(github.event.head_commit.modified, 'frontend/') ||
-       contains(github.event.head_commit.modified, 'Dockerfile') ||
-       contains(github.event.head_commit.modified, 'ansible/'))
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     
     steps:
       - name: Checkout code
