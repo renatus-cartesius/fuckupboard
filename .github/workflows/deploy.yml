@@ -13,6 +13,19 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Only run if backend or frontend code changed
+    if: |
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push'
+    # Use paths filter to only run when relevant files change
+    paths:
+      - 'main.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'frontend/**'
+      - 'Dockerfile*'
+      - 'migrations/**'
+      - 'cmd/**'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,10 +57,10 @@ jobs:
           cd frontend
           npm ci
 
-      # - name: Test frontend
-      #   run: |
-      #     cd frontend
-      #     npm test -- --watchAll=false
+      - name: Test frontend
+        run: |
+          cd frontend
+          npm test -- --watchAll=false
 
   build:
     needs: test
@@ -56,6 +69,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+    # Use paths filter to only run when relevant files change
+    paths:
+      - 'main.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'frontend/**'
+      - 'Dockerfile*'
+      - 'migrations/**'
+      - 'cmd/**'
 
     steps:
       - name: Checkout code
@@ -114,6 +136,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    # Use paths filter to only run when relevant files change
+    paths:
+      - 'main.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'frontend/**'
+      - 'Dockerfile*'
+      - 'migrations/**'
+      - 'cmd/**'
+      - 'ansible/**'
     
     steps:
       - name: Checkout code
