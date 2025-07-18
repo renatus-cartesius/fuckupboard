@@ -109,6 +109,24 @@ docker-compose down
 docker-compose logs -f
 ```
 
+## Infrastructure Setup
+
+### Yandex Cloud Infrastructure
+
+The project includes Terraform configuration for provisioning infrastructure in Yandex Cloud.
+
+#### Quick Setup
+1. **Configure credentials**: Copy `terraform/terraform.tfvars.example` to `terraform/terraform.tfvars` and fill in your Yandex Cloud credentials
+2. **Initialize Terraform**: `cd terraform && terraform init`
+3. **Deploy infrastructure**: `terraform apply`
+
+For detailed instructions, see [terraform/README.md](terraform/README.md).
+
+#### Cost Optimization
+- **Preemptible instances**: Up to 70% cost savings
+- **Minimal resources**: 1 vCPU, 1 GB RAM, 10 GB disk
+- **Network HDD**: Cheaper than SSD for boot disk
+
 ## Production Deployment
 
 The application includes a complete CI/CD pipeline using GitHub Actions and Ansible.
@@ -148,6 +166,11 @@ fckupboard/
 │   └── 20240101000001_add_likes_index.sql
 ├── cmd/migrate/               # Migration tool
 │   └── main.go               # Goose migration runner
+├── terraform/                 # Infrastructure as Code
+│   ├── main.tf               # Main Terraform configuration
+│   ├── variables.tf          # Variable definitions
+│   ├── terraform.tfvars.example # Example variables file
+│   └── README.md             # Terraform setup instructions
 ├── .github/workflows/         # GitHub Actions CI/CD
 │   └── deploy.yml
 ├── ansible/                   # Ansible deployment
