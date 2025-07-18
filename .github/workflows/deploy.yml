@@ -96,7 +96,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Extract metadata for backend
         id: meta-backend
@@ -157,21 +157,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Ansible
-        run: |
-          python -m pip install --upgrade pip
-          pip install ansible
-
-      - name: Install Ansible Collections
-        run: |
-          cd ansible
-          ansible-galaxy collection install -r requirements.yml
-
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
@@ -179,12 +164,22 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy with Ansible
+      - name: Login to GHCR on remote server
         run: |
-          cd ansible
-          ansible-playbook -i ${{ secrets.SERVER_HOST }}, deploy.yml \
-            -e "backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}" \
-            -e "frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}" \
-            -e "ansible_user=${{ secrets.SERVER_USER }}" \
-            --private-key ~/.ssh/id_rsa \
-            -u ${{ secrets.SERVER_USER }} 
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "echo '${{ secrets.GHCR_PAT }}' | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+
+      - name: Run Ansible deployment
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ansible/deploy.yml
+          inventory: ${{ secrets.SERVER_HOST }}
+          options: |
+            --private-key ~/.ssh/id_rsa
+            -u ${{ secrets.SERVER_USER }}
+            -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+            -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+            -e ansible_user=${{ secrets.SERVER_USER }}
+            -e ghcr_auth_token=${{ secrets.GHCR_PAT }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: false 

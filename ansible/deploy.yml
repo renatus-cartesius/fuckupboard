@@ -112,6 +112,36 @@
         - "{{ frontend_image }}"
       ignore_errors: yes
 
+    # Handle Docker authentication for private images
+    - name: Get user home directory
+      shell: echo $HOME
+      register: user_home
+      become: yes
+      become_user: "{{ ansible_user }}"
+
+    - name: Create Docker config directory
+      file:
+        path: "{{ user_home.stdout }}/.docker"
+        state: directory
+        mode: '0700'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Create Docker config file
+      copy:
+        content: |
+          {
+            "auths": {
+              "ghcr.io": {
+                "auth": "{{ ghcr_auth_token }}"
+              }
+            }
+          }
+        dest: "{{ user_home.stdout }}/.docker/config.json"
+        mode: '0600'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
     - name: Pull latest images
       docker_image:
         name: "{{ item }}"
@@ -195,3 +225,9 @@
           
           Backend Image: {{ backend_image }}
           Frontend Image: {{ frontend_image }}
+
+    # Clean up Docker credentials for security
+    - name: Clean up Docker config
+      file:
+        path: "{{ user_home.stdout }}/.docker"
+        state: absent

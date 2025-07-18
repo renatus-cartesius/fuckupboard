@@ -136,6 +136,7 @@ The application includes a complete CI/CD pipeline using GitHub Actions and Ansi
    - `SSH_PRIVATE_KEY`: Content of your private key file
    - `SERVER_HOST`: Your server's public IP address
    - `SERVER_USER`: SSH username (usually `ubuntu`)
+   - `GHCR_PAT`: GitHub Personal Access Token with `write:packages` and `read:packages` permissions
 2. Push to main branch to trigger automatic deployment
 3. Access your application at `http://your-server-ip`
 
