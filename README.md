@@ -132,7 +132,10 @@ For detailed instructions, see [terraform/README.md](terraform/README.md).
 The application includes a complete CI/CD pipeline using GitHub Actions and Ansible.
 
 ### Quick Start
-1. Set up GitHub repository secrets (see `DEPLOYMENT.md`)
+1. Set up GitHub repository secrets:
+   - `SSH_PRIVATE_KEY`: Content of your private key file
+   - `SERVER_HOST`: Your server's public IP address
+   - `SERVER_USER`: SSH username (usually `ubuntu`)
 2. Push to main branch to trigger automatic deployment
 3. Access your application at `http://your-server-ip`
 

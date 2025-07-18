@@ -129,6 +129,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible
 
+      - name: Install Ansible Collections
+        run: |
+          cd ansible
+          ansible-galaxy collection install -r requirements.yml
+
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
@@ -139,8 +144,9 @@ jobs:
       - name: Deploy with Ansible
         run: |
           cd ansible
-          ansible-playbook -i inventory.yml deploy.yml \
+          ansible-playbook -i ${{ secrets.SERVER_HOST }}, deploy.yml \
             -e "backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}" \
             -e "frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}" \
+            -e "ansible_user=${{ secrets.SERVER_USER }}" \
             --private-key ~/.ssh/id_rsa \
             -u ${{ secrets.SERVER_USER }} 
