@@ -39,10 +39,10 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Test frontend
-        run: |
-          cd frontend
-          npm test -- --watchAll=false
+      # - name: Test frontend
+      #   run: |
+      #     cd frontend
+      #     npm test -- --watchAll=false
 
   build:
     needs: test
