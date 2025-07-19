@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: renatus-cartesius/fuckupboard
 
 jobs:
   test:
@@ -98,17 +98,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate build number
+        id: build_number
+        run: |
+          echo "number=$(date +%s)" >> $GITHUB_OUTPUT
+
       - name: Extract metadata for backend
         id: meta-backend
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=raw,value=master-${{ steps.build_number.outputs.number }}
+            type=raw,value=latest
 
       - name: Extract metadata for frontend
         id: meta-frontend
@@ -116,11 +118,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=raw,value=master-${{ steps.build_number.outputs.number }}
+            type=raw,value=latest
 
       - name: Build and push backend image
         if: |
@@ -176,10 +175,10 @@ jobs:
           inventory: ${{ secrets.SERVER_HOST }}
           options: |
             --private-key ~/.ssh/id_rsa
-            -u ${{ secrets.SERVER_USER }}
-            -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
-            -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
-            -e ansible_user=${{ secrets.SERVER_USER }}
+            -u ubuntu
+            -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.ref_name }}
+            -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.ref_name }}
+            -e ansible_user=ubuntu
             -e ghcr_auth_token="${{ github.actor }}:${{ secrets.GHCR_PAT }}"
         env:
           ANSIBLE_HOST_KEY_CHECKING: false 

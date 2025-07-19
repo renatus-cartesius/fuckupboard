@@ -3,8 +3,8 @@
   hosts: all
   become: yes
   vars:
-    backend_image: "{{ backend_image | default('ghcr.io/your-username/fckupboard-backend:latest') }}"
-    frontend_image: "{{ frontend_image | default('ghcr.io/your-username/fckupboard-frontend:latest') }}"
+    backend_image: "{{ backend_image | default('ghcr.io/renatus-cartesius/fuckupboard-backend:latest') }}"
+    frontend_image: "{{ frontend_image | default('ghcr.io/renatus-cartesius/fuckupboard-frontend:latest') }}"
     app_name: fuckupboard
     docker_network: fuckupboard-network
     backend_port: 8080
@@ -143,9 +143,10 @@
         group: "{{ ansible_user }}"
 
     - name: Pull latest images
-      docker_image:
+      community.docker.docker_image_pull:
         name: "{{ item }}"
-        source: pull
+        platform: amd64
+      become: false
       loop:
         - "{{ backend_image }}"
         - "{{ frontend_image }}"
@@ -155,12 +156,14 @@
         name: "{{ item }}"
         state: absent
         force_kill: yes
+      become: false
       loop:
         - "{{ app_name }}-backend"
         - "{{ app_name }}-frontend"
       ignore_errors: yes
 
     - name: Create backend container
+      become: false
       docker_container:
         name: "{{ app_name }}-backend"
         image: "{{ backend_image }}"
@@ -171,7 +174,7 @@
         ports:
           - "{{ backend_port }}:8080"
         volumes:
-          - "{{ db_path }}/{{ db_file }}:/root/{{ db_file }}"
+          - "{{ db_path }}/{{ db_file }}:/root/{{ db_file }}:rw"
         env:
           GIN_MODE: "release"
         healthcheck:
@@ -180,9 +183,10 @@
           timeout: 10s
           retries: 3
           start_period: 40s
-        user: "{{ ansible_user }}"
+        user: "0"
 
     - name: Wait for backend to be healthy
+      become: false
       wait_for:
         host: "{{ ansible_host }}"
         port: "{{ backend_port }}"
@@ -190,6 +194,7 @@
         timeout: 60
 
     - name: Create frontend container
+      become: false
       docker_container:
         name: "{{ app_name }}-frontend"
         image: "{{ frontend_image }}"
@@ -209,6 +214,7 @@
           start_period: 40s
 
     - name: Wait for frontend to be healthy
+      become: false
       wait_for:
         host: "{{ ansible_host }}"
         port: "{{ frontend_port }}"
