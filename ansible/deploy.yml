@@ -72,6 +72,13 @@
         - /opt/fuckupboard
         - "{{ db_path }}"
         - /opt/fuckupboard/logs
+        - /opt/fuckupboard/monitoring
+        - /opt/fuckupboard/monitoring/prometheus
+        - /opt/fuckupboard/monitoring/grafana
+        - /opt/fuckupboard/monitoring/grafana/provisioning
+        - /opt/fuckupboard/monitoring/grafana/provisioning/datasources
+        - /opt/fuckupboard/monitoring/grafana/provisioning/dashboards
+        - /opt/fuckupboard/monitoring/grafana/dashboards
 
     - name: Install SQLite3
       apt:
@@ -98,10 +105,53 @@
       become: yes
       become_user: "{{ ansible_user }}"
 
+    # Copy monitoring configuration files
+    - name: Copy Prometheus configuration
+      copy:
+        src: "../monitoring/prometheus/prometheus.yml"
+        dest: "/opt/fuckupboard/monitoring/prometheus/prometheus.yml"
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy Grafana datasource configuration
+      copy:
+        src: "../monitoring/grafana/provisioning/datasources/prometheus.yml"
+        dest: "/opt/fuckupboard/monitoring/grafana/provisioning/datasources/prometheus.yml"
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy Grafana dashboard provisioning configuration
+      copy:
+        src: "../monitoring/grafana/provisioning/dashboards/dashboard.yml"
+        dest: "/opt/fuckupboard/monitoring/grafana/provisioning/dashboards/dashboard.yml"
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy Grafana dashboard
+      copy:
+        src: "../monitoring/grafana/dashboards/fuckupboard-business-metrics.json"
+        dest: "/opt/fuckupboard/monitoring/grafana/dashboards/fuckupboard-business-metrics.json"
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy monitoring Docker Compose file
+      copy:
+        src: "../monitoring/docker-compose.yml"
+        dest: "/opt/fuckupboard/monitoring/docker-compose.yml"
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
     - name: Create Docker network
       docker_network:
         name: "{{ docker_network }}"
         state: present
+
+
 
     - name: Remove old images
       docker_image:
@@ -223,16 +273,23 @@
         delay: 10
         timeout: 60
 
+
+
     - name: Show deployment status
       debug:
         msg: |
           Deployment completed successfully!
           
-          Backend: http://{{ ansible_host }}:{{ backend_port }}
-          Frontend: http://{{ ansible_host }}:{{ frontend_port }}
+          Application:
+          - Backend: http://{{ ansible_host }}:{{ backend_port }}
+          - Frontend: http://{{ ansible_host }}:{{ frontend_port }}
           
-          Backend Image: {{ backend_image }}
-          Frontend Image: {{ frontend_image }}
+          Images:
+          - Backend: {{ backend_image }}
+          - Frontend: {{ frontend_image }}
+          
+          Monitoring configuration copied to /opt/fuckupboard/monitoring/
+          To start monitoring: cd /opt/fuckupboard/monitoring && docker-compose up -d
 
     # Clean up Docker credentials for security
     - name: Clean up Docker config
