@@ -235,13 +235,13 @@
         #   start_period: 40s
         user: "0"
 
-    - name: Wait for backend to be healthy
-      become: false
-      wait_for:
-        host: "{{ ansible_host }}"
-        port: "{{ backend_port }}"
-        delay: 10
-        timeout: 60
+    # - name: Wait for backend to be healthy
+    #   become: false
+    #   wait_for:
+    #     host: "{{ ansible_host }}"
+    #     port: "{{ backend_port }}"
+    #     delay: 10
+    #     timeout: 60
 
     - name: Create frontend container
       become: false
@@ -265,13 +265,13 @@
         #   retries: 3
         #   start_period: 40s
 
-    - name: Wait for frontend to be healthy
-      become: false
-      wait_for:
-        host: "{{ ansible_host }}"
-        port: "{{ frontend_port }}"
-        delay: 10
-        timeout: 60
+    # - name: Wait for frontend to be healthy
+    #   become: false
+    #   wait_for:
+    #     host: "{{ ansible_host }}"
+    #     port: "{{ frontend_port }}"
+    #     delay: 10
+    #     timeout: 60
 
 
 
