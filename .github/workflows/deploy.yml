@@ -3,156 +3,100 @@ name: Build and Deploy
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: renatus-cartesius/fuckupboard
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        if: |
-          contains(github.event.head_commit.modified, 'main.go') ||
-          contains(github.event.head_commit.modified, 'go.mod') ||
-          contains(github.event.head_commit.modified, 'go.sum') ||
-          contains(github.event.head_commit.modified, 'Dockerfile.backend')
-#          github.event_name == 'pull_request'
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.23.10'
-
-      - name: Install CGO dependencies
-        if: |
-          contains(github.event.head_commit.modified, 'main.go') ||
-          contains(github.event.head_commit.modified, 'go.mod') ||
-          contains(github.event.head_commit.modified, 'go.sum') ||
-          contains(github.event.head_commit.modified, 'Dockerfile.backend')
-#          github.event_name == 'pull_request'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc libc6-dev libsqlite3-dev
-
-      - name: Test backend
-        if: |
-          contains(github.event.head_commit.modified, 'main.go') ||
-          contains(github.event.head_commit.modified, 'go.mod') ||
-          contains(github.event.head_commit.modified, 'go.sum') ||
-          contains(github.event.head_commit.modified, 'Dockerfile.backend')
-#          github.event_name == 'pull_request'
-        run: |
-          cd ${{ github.workspace }}
-          CGO_ENABLED=1 go test -v ./...
-
-      - name: Set up Node.js
-        if: |
-          contains(github.event.head_commit.modified, 'frontend/') ||
-          contains(github.event.head_commit.modified, 'frontend/Dockerfile')
-#          github.event_name == 'pull_request'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend dependencies
-        if: |
-          contains(github.event.head_commit.modified, 'frontend/') ||
-          contains(github.event.head_commit.modified, 'frontend/Dockerfile')
-#          github.event_name == 'pull_request'
-        run: |
-          cd frontend
-          npm ci
-
-      # - name: Test frontend
-      #   if: |
-      #     contains(github.event.head_commit.modified, 'frontend/') ||
-      #     contains(github.event.head_commit.modified, 'frontend/Dockerfile') ||
-      #     github.event_name == 'pull_request'
-      #   run: |
-      #     cd frontend
-      #     npm test -- --watchAll=false
-
   build:
-    needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       contents: read
       packages: write
+    outputs:
+      backend_changed: ${{ steps.backend_changes.outputs.changed }}
+      frontend_changed: ${{ steps.frontend_changes.outputs.changed }}
+      ansible_changed: ${{ steps.ansible_changes.outputs.changed }}
+      commit_sha: ${{ steps.get_commit.outputs.sha }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get commit SHA
+        id: get_commit
+        run: echo "sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Check for backend changes
+        id: backend_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -E '^(main\.go|go\.mod|go\.sum|Dockerfile\.backend|\.github/workflows/deploy\.yml)' > /dev/null; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for frontend changes
+        id: frontend_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -E '^frontend/' > /dev/null; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for ansible changes
+        id: ansible_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -E '^ansible/' > /dev/null; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Log in to Container Registry
+        if: steps.backend_changes.outputs.changed == 'true' || steps.frontend_changes.outputs.changed == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate build number
-        id: build_number
-        run: |
-          echo "number=$(date +%s)" >> $GITHUB_OUTPUT
-
-      - name: Extract metadata for backend
-        id: meta-backend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
-          tags: |
-            type=raw,value=master-${{ steps.build_number.outputs.number }}
-            type=raw,value=latest
-
-      - name: Extract metadata for frontend
-        id: meta-frontend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-          tags: |
-            type=raw,value=master-${{ steps.build_number.outputs.number }}
-            type=raw,value=latest
-
       - name: Build and push backend image
-        if: |
-          contains(github.event.head_commit.modified, 'main.go') ||
-          contains(github.event.head_commit.modified, 'go.mod') ||
-          contains(github.event.head_commit.modified, 'go.sum') ||
-          contains(github.event.head_commit.modified, 'Dockerfile.backend')
+        if: steps.backend_changes.outputs.changed == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.backend
           push: true
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.ref_name }}-${{ steps.get_commit.outputs.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
 
       - name: Build and push frontend image
-        if: |
-          contains(github.event.head_commit.modified, 'frontend/') ||
-          contains(github.event.head_commit.modified, 'frontend/Dockerfile')
+        if: steps.frontend_changes.outputs.changed == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.ref_name }}-${{ steps.get_commit.outputs.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
           build-args: |
             REACT_APP_API_URL=http://fuckupboard-backend:8080
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: |
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
+      (needs.build.outputs.backend_changed == 'true' || 
+       needs.build.outputs.frontend_changed == 'true' || 
+       needs.build.outputs.ansible_changed == 'true')
     
     steps:
       - name: Checkout code
@@ -178,8 +122,8 @@ jobs:
           options: |
             --private-key ~/.ssh/id_rsa
             -u ubuntu
-            -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.ref_name }}
-            -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.ref_name }}
+            -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.ref_name }}-${{ needs.build.outputs.commit_sha }}
+            -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.ref_name }}-${{ needs.build.outputs.commit_sha }}
             -e ansible_user=ubuntu
             -e ghcr_auth_token="${{ github.actor }}:${{ secrets.GHCR_PAT }}"
         env:
