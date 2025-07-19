@@ -61,6 +61,13 @@ resource "yandex_vpc_security_group" "sg" {
     port           = 443
   }
 
+  ingress {
+    protocol       = "TCP"
+    description    = "HTTP access"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 8080
+  }
+
   egress {
     protocol       = "ANY"
     description    = "Allow all outbound traffic"
