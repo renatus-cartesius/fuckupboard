@@ -133,7 +133,7 @@
           {
             "auths": {
               "ghcr.io": {
-                "auth": "{{ ghcr_auth_token }}"
+                "auth": "{{ ghcr_auth_token | b64encode }}" 
               }
             }
           }

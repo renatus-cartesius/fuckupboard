@@ -96,7 +96,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata for backend
         id: meta-backend
@@ -167,7 +167,7 @@ jobs:
       - name: Login to GHCR on remote server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "echo '${{ secrets.GHCR_PAT }}' | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+            "echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
 
       - name: Run Ansible deployment
         uses: dawidd6/action-ansible-playbook@v2
@@ -180,6 +180,6 @@ jobs:
             -e backend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
             -e frontend_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
             -e ansible_user=${{ secrets.SERVER_USER }}
-            -e ghcr_auth_token=${{ secrets.GHCR_PAT }}
+            -e ghcr_auth_token="${{ github.actor }}:${{ secrets.GHCR_PAT }}"
         env:
           ANSIBLE_HOST_KEY_CHECKING: false 
