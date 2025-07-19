@@ -23,8 +23,40 @@ body {
   background: #f8f9fa;
   color: #333333;
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 20px;
   border-bottom: 1px solid #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.App-logo {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.header-text {
+  text-align: left;
+}
+
+.header-text h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
+.header-text p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 300;
 }
 
 .App-header h1 {
@@ -138,6 +170,23 @@ body {
 }
 
 @media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .header-text {
+    text-align: center;
+  }
+  
+  .header-text h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-text p {
+    font-size: 0.875rem;
+  }
+  
   .App-header h1 {
     font-size: 2rem;
   }

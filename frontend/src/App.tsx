@@ -6,6 +6,7 @@ import { Fuckup, AddFuckupRequest } from './types/Fuckup';
 import { fuckupApi } from './services/api';
 import { likeService } from './services/likeService';
 import { sortFuckupsByLikes } from './utils/sortUtils';
+import logo from './logo.svg';
 
 function App() {
   const [fuckups, setFuckups] = useState<Fuckup[]>([]);
@@ -101,8 +102,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Fuckup Board</h1>
-        <p>Share your IT disasters and learn from others' mistakes</p>
+        <div className="header-content">
+          <img src={logo} alt="Fuckup Board Logo" className="App-logo" />
+          <div className="header-text">
+            <h1>Fuckup Board</h1>
+            <p>Share your IT disasters and learn from others' mistakes</p>
+          </div>
+        </div>
         <div className="header-stats">
           <span>You've liked {likedCount} fuckup{likedCount !== 1 ? 's' : ''}</span>
         </div>
