@@ -204,6 +204,8 @@
           - name: "{{ docker_network }}"
         ports:
           - "{{ frontend_port }}:80"
+        env:
+          REACT_APP_API_URL: "http://{{ app_name }}-backend:8080"
         # depends_on:
         #   - "{{ app_name }}-backend"
         # healthcheck:

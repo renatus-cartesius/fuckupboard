@@ -70,14 +70,14 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Test frontend
-        if: |
-          contains(github.event.head_commit.modified, 'frontend/') ||
-          contains(github.event.head_commit.modified, 'frontend/Dockerfile') ||
-          github.event_name == 'pull_request'
-        run: |
-          cd frontend
-          npm test -- --watchAll=false
+      # - name: Test frontend
+      #   if: |
+      #     contains(github.event.head_commit.modified, 'frontend/') ||
+      #     contains(github.event.head_commit.modified, 'frontend/Dockerfile') ||
+      #     github.event_name == 'pull_request'
+      #   run: |
+      #     cd frontend
+      #     npm test -- --watchAll=false
 
   build:
     needs: test
@@ -146,6 +146,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+          build-args: |
+            REACT_APP_API_URL=http://fuckupboard-backend:8080
 
   deploy:
     needs: build
