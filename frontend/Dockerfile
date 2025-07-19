@@ -13,25 +13,29 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application with environment variables
-ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=${REACT_APP_API_URL:-http://fuckupboard-backend:8080}
+# Build the application
 RUN npm run build
 
 # Production stage
 FROM node:18-alpine
 
-# Install serve for static file serving
-RUN npm install -g serve
-
 # Set working directory
 WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies
+RUN npm ci --only=production
 
 # Copy built files from builder stage
 COPY --from=builder /app/build ./build
 
+# Copy server file
+COPY server.js ./
+
 # Expose port
 EXPOSE 80
 
-# Start the application
-CMD ["serve", "-s", "build", "-l", "80"] 
+# Start the server
+CMD ["node", "server.js"] 

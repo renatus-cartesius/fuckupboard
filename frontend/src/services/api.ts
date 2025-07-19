@@ -1,12 +1,10 @@
 import axios from 'axios';
 import { Fuckup, AddFuckupRequest } from '../types/Fuckup';
 
-// Get API URL from environment variable or use default
-// For production builds, this will be replaced at build time
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://fuckupboard-backend:8080';
-
+// API calls now go through the server-side proxy
+// The server handles communication with the backend
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '/api', // Call local server-side proxy
   headers: {
     'Content-Type': 'application/json',
   },

@@ -86,8 +86,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.ref_name }}-${{ steps.get_commit.outputs.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-          build-args: |
-            REACT_APP_API_URL=http://fuckupboard-backend:8080
+
 
   deploy:
     needs: build

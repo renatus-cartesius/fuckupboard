@@ -238,4 +238,4 @@
     - name: Clean up Docker config
       file:
         path: "{{ user_home.stdout }}/.docker"
-        state: absent 
+        state: absent
