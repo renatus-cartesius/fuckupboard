@@ -169,6 +169,33 @@ body {
   transition: all 0.3s ease;
 }
 
+.App-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 20px 0;
+  margin-top: auto;
+}
+
+.App-footer p {
+  margin: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 300;
+}
+
+.github-link {
+  color: #495057;
+  text-decoration: none;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+.github-link:hover {
+  color: #333333;
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;

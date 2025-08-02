@@ -151,6 +151,22 @@ function App() {
           </div>
         </div>
       </main>
+
+      <footer className="App-footer">
+        <div className="container">
+          <p>
+            made by{' '}
+            <a 
+              href="https://github.com/renatus-cartesius" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="github-link"
+            >
+              @renatuscartesius
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
